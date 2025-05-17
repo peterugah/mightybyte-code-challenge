@@ -2,7 +2,7 @@ import { DriverLoginDto } from '@monorepo/shared';
 import { Body, Controller, Post } from '@nestjs/common';
 import { DriverService } from 'src/driver/driver.service';
 import { driverLoginValidatorSchema } from 'src/driver/driver.validator';
-import { ZodValidationPipe } from 'utils/zod.pipe';
+import { ZodValidationPipe } from 'src/utils/zod.pipe';
 
 @Controller('')
 export class AppController {

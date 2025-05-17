@@ -14,6 +14,7 @@ async function bootstrap() {
     Appply the token guard to all endpoints. This ensures that when the @ValidateJWT decorator is applied to a controller / endpoint, the guard automatically runs the evaluation logic   
   */
   app.useGlobalGuards(new TokenGuard(reflector, jwtService));
+  /** custom websocket adapter to always parse message from string to json */
 
   await app.listen(PORT);
   Logger.debug(`Http and websocket server listening on port ${PORT}`);

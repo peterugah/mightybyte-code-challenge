@@ -3,9 +3,10 @@ import { DriverService } from './driver.service';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { JwtModule } from 'src/jwt/jwt.module';
 import { DriverController } from './driver.controller';
+import { DriverWebsocketGateway } from './driver.gateway';
 
 @Module({
-  providers: [DriverService],
+  providers: [DriverService, DriverWebsocketGateway],
   exports: [DriverService],
   imports: [PrismaModule, JwtModule],
   controllers: [DriverController],

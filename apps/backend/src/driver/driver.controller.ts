@@ -1,10 +1,10 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { JWTPayload, ValidateJWT } from 'src/jwt/jwt.decorator';
-import { ZodValidationPipe } from 'utils/zod.pipe';
 import { updateLocationValidatorSchema } from './driver.validator';
 import { AddDriveLocationDto } from '@monorepo/shared';
 import { JWTDto } from 'src/jwt/jwt.type';
 import { DriverService } from './driver.service';
+import { ZodValidationPipe } from 'src/utils/zod.pipe';
 
 @Controller('driver')
 export class DriverController {

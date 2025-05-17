@@ -60,7 +60,9 @@ export class DriverService implements OnModuleInit {
       },
     ];
     // clear existing data
+    await this.prismaService.location.deleteMany();
     await this.prismaService.driver.deleteMany();
+    // create demo users
     await this.prismaService.driver.createMany({ data: users });
   }
 
