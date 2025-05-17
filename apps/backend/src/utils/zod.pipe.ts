@@ -1,4 +1,5 @@
 import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
+import { WsException } from '@nestjs/websockets';
 import { ZodSchema } from 'zod';
 
 /**
@@ -9,8 +10,24 @@ import { ZodSchema } from 'zod';
 export class ZodValidationPipe implements PipeTransform {
   constructor(private schema: ZodSchema) { }
 
+  /**
+    NOTE: 
+    Websocket data comes in as string. We expect that all websocket messages would be valid json. 
+    This function will try to parse the messages or throw an error. The error will be returned to the websocket as an error message type
+ */
+  parseValue(value: any) {
+    try {
+      return JSON.parse(value);
+    } catch {
+      throw new WsException('Invalid json object provided as input');
+    }
+  }
+
   transform(value: unknown) {
-    const result = this.schema.safeParse(value);
+    const transformedValue =
+      typeof value === 'string' ? this.parseValue(value) : value;
+
+    const result = this.schema.safeParse(transformedValue);
 
     console.log(JSON.stringify(result, null, 2));
 
