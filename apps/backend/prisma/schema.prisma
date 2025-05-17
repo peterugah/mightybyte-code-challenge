@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Driver {
+  id             Int        @id @default(autoincrement())
+  username       String
+  firstName      String
+  lastName       String
+  image          String
+  hashedPassword String
+  refreshToken   String
+  connectionId   String
+  createdAt      DateTime   @default(now())
+  locations      Location[]
+}
+
+model Location {
+  id        Int      @id @default(autoincrement())
+  driverId  Int
+  driver    Driver   @relation(fields: [driverId], references: [id])
+  latitude  Float
+  longitude Float
+  timestamp DateTime @default(now())
+}

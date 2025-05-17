@@ -1,0 +1,23 @@
+@baseUrl = http://localhost:3000
+
+### Replace @token with token received after logging in
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NiwiaWF0IjoxNzQ3NDQ3MjE1LCJleHAiOjE3NDc0NTAyMTV9.1H4u1oOyBUpgjPA2i74EtJHLqbXuMOEGf_FpyFwG2Oc
+
+### Login as a driver
+POST {{baseUrl}}/login 
+Content-Type: application/json
+
+{
+  "username":"driverthree",
+  "password":"demo"
+}
+
+### Update driver's current location
+POST {{baseUrl}}/driver/update
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "latitude": 40,
+  "longitude": 0
+}
