@@ -50,7 +50,7 @@ export class DriverWebsocketGateway {
   }
 
   /**
-   * handler for the client to get latest details of a specific driver
+   * handler for the client to get latest details and location of a specific driver
    */
   @SubscribeMessage(WebsocketMessages.REQUEST_DRIVER_DETAILS_AND_LOCATION)
   getDriverDetailsAndLocation(
