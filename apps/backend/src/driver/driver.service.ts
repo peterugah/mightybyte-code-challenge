@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
   OnModuleInit,
 } from '@nestjs/common';
@@ -17,6 +18,7 @@ import {
 } from '@monorepo/shared';
 import { JwtService } from 'src/jwt/jwt.service';
 import { DriverDetails } from './driver.type';
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class DriverService implements OnModuleInit {
@@ -26,10 +28,21 @@ export class DriverService implements OnModuleInit {
     private readonly jwtService: JwtService,
   ) { }
   onModuleInit() {
-    void this.generateDemoDrivers();
+    void this.generateDemoDrivers()
+      .then(() => {
+        // print the details of the drivers
+        return this.prismaService.driver.findMany();
+      })
+      .then((drivers) => {
+        Logger.debug({ drivers });
+      });
   }
-
   private async generateDemoDrivers() {
+    const count = await this.prismaService.driver.count();
+
+    if (count >= 3) {
+      return true;
+    }
     const users: Prisma.DriverCreateManyInput[] = [
       {
         connectionId: '',
@@ -116,22 +129,71 @@ export class DriverService implements OnModuleInit {
     if (!validPassword) {
       throw new BadRequestException(`incorrect login credentails provided`);
     }
-
-    const token = this.jwtService.generateToken({
-      id: driver.id,
-      expiresIn: Number(this.configService.get<number>(EnvEnum.JWT_EXPIRATION)),
-    });
-
-    const refreshToken = this.jwtService.generateToken({
-      id: driver.id,
-      expiresIn: Number(
-        this.configService.get<number>(EnvEnum.JWT_REFRESH_EXPIRATION)!,
-      ),
-    });
+    const { token, refreshToken } = this.generateTokens(driver.id);
     // update the user's refresh token
     await this.updateRefreshToken(refreshToken, driver.id);
 
     return { token, refreshToken, driver: this.getDriverDetails(driver) };
+  }
+
+  generateTokens(id: number) {
+    const token = this.jwtService.generateToken({
+      id,
+      expiresIn: this.configService.get<number>(EnvEnum.JWT_EXPIRATION)!,
+    });
+
+    const refreshToken = this.jwtService.generateRefreshToken({
+      id: uuid(),
+      expiresIn: this.configService.get<number>(
+        EnvEnum.JWT_REFRESH_EXPIRATION,
+      )!,
+    });
+    return { token, refreshToken };
+  }
+
+  async getDetailsByRefreshToken(refreshToken: string) {
+    return this.prismaService.driver.findFirst({
+      where: { refreshToken },
+      select: {
+        id: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        image: true,
+      },
+    });
+  }
+
+  async getDetailsAndLastLocation(id: number) {
+    const record = await this.prismaService.driver.findFirst({
+      where: { id },
+      select: {
+        id: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        image: true,
+
+        locations: {
+          orderBy: {
+            timestamp: 'desc',
+          },
+          take: 1,
+          select: {
+            timestamp: true,
+            latitude: true,
+            longitude: true,
+          },
+        },
+      },
+    });
+
+    if (!record) {
+      throw new BadRequestException(
+        `unabled to load driver details and last location for driver with id: ${id}`,
+      );
+    }
+    return record;
   }
 
   addLocation(payload: AddDriveLocationDto, driverId: number) {
@@ -141,5 +203,11 @@ export class DriverService implements OnModuleInit {
         driverId,
       },
     });
+  }
+
+  isOlderThanTenMinutes(timestamp: string): boolean {
+    const tsMillis = new Date(timestamp).getTime();
+    const tenMinutesInMs = 10 * 60 * 1000;
+    return Date.now() - tsMillis > tenMinutesInMs;
   }
 }

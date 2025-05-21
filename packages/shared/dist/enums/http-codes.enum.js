@@ -6,5 +6,6 @@ exports.CustomHttpCodes = void 0;
  */
 var CustomHttpCodes;
 (function (CustomHttpCodes) {
-    CustomHttpCodes[CustomHttpCodes["JWT_EXPIRED"] = 600] = "JWT_EXPIRED";
+    CustomHttpCodes[CustomHttpCodes["TOKEN_EXPIRED"] = 600] = "TOKEN_EXPIRED";
+    CustomHttpCodes[CustomHttpCodes["REFRESH_TOKEN_EXPIRED"] = 601] = "REFRESH_TOKEN_EXPIRED";
 })(CustomHttpCodes || (exports.CustomHttpCodes = CustomHttpCodes = {}));

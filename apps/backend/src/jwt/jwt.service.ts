@@ -1,8 +1,8 @@
-import { HttpException, Injectable, OnModuleInit } from '@nestjs/common';
+import { BadRequestException, Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
 import { EnvEnum } from 'src/env/env.enum';
-import { JWTDto } from './jwt.type';
+import { RefreshTokenDto, TokenDto } from './jwt.type';
 import { CustomHttpCodes } from '@monorepo/shared';
 
 @Injectable()
@@ -14,23 +14,48 @@ export class JwtService implements OnModuleInit {
     this.secret = this.configService.get<string>(EnvEnum.JWT_SECRET)!;
   }
 
-  generateToken({ id, expiresIn }: JWTDto) {
+  generateToken({ id, expiresIn }: TokenDto) {
     return jwt.sign({ id }, this.secret, { expiresIn }); //expires in 5 minutes
   }
 
-  verify(token: string) {
-    return new Promise((resolve, reject) => {
-      jwt.verify(token, this.secret, (err, decoded: JWTDto) => {
+  generateRefreshToken({ id, expiresIn }: RefreshTokenDto) {
+    return jwt.sign({ id }, this.secret, { expiresIn }); //expires in 5 minutes
+  }
+
+  private getErrorMessage(err: jwt.VerifyErrors) {
+    switch (err.name) {
+      case 'TokenExpiredError':
+        return 'Token expired, refresh the token';
+      case 'JsonWebTokenError':
+      case 'NotBeforeError':
+        return 'Invalid token provided';
+      default:
+        return 'Invalid token provided';
+    }
+  }
+  verifyToken(token: string) {
+    return new Promise<TokenDto>((resolve, reject) => {
+      jwt.verify(token, this.secret, (err, decoded: TokenDto) => {
         if (err) {
           reject(
-            new HttpException(
-              'jwt token expired, refresh token',
-              /**
-                  INFO: 
-                  When this custom status code is returned on any request to the frontend, The frontend is required to make a follow up request to refresh the token 
-                */
-              CustomHttpCodes.JWT_EXPIRED,
-            ),
+            new BadRequestException(this.getErrorMessage(err), {
+              cause: CustomHttpCodes.TOKEN_EXPIRED,
+            }),
+          );
+        }
+        resolve(decoded);
+      });
+    });
+  }
+
+  verifyRefreshToken(refreshToken: string) {
+    return new Promise<RefreshTokenDto>((resolve, reject) => {
+      jwt.verify(refreshToken, this.secret, (err, decoded: RefreshTokenDto) => {
+        if (err) {
+          reject(
+            new BadRequestException(this.getErrorMessage(err), {
+              cause: CustomHttpCodes.REFRESH_TOKEN_EXPIRED,
+            }),
           );
         }
         resolve(decoded);
