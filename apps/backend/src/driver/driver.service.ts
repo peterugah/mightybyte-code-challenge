@@ -41,7 +41,7 @@ export class DriverService implements OnModuleInit {
     const count = await this.prismaService.driver.count();
 
     if (count >= 3) {
-      return true;
+      return;
     }
     const users: Prisma.DriverCreateManyInput[] = [
       {
