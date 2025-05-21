@@ -2,5 +2,6 @@
  * This enum defines internal http codes for the project
  */
 export enum CustomHttpCodes {
-  JWT_EXPIRED = 600,
+  TOKEN_EXPIRED = 600,
+  REFRESH_TOKEN_EXPIRED = 601,
 }

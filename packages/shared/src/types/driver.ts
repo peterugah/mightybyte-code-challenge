@@ -17,3 +17,11 @@ export interface AddDriveLocationDto {
   latitude: number;
   longitude: number;
 }
+
+export interface GetDriverDetailsAndLocationDto {
+  id: number;
+}
+
+export interface RefreshDriverTokenDto {
+  refreshToken: string;
+}

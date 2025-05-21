@@ -1,1 +1,1 @@
-export const VALIDATE_JWT_FLAG = 'VALIDATE_JWT';
+export const VALIDATE_TOKEN_FLAG = 'VALIDATE_JWT';
