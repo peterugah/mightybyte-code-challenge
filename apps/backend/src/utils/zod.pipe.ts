@@ -28,6 +28,7 @@ export class ZodValidationPipe implements PipeTransform {
     const transformedValue =
       typeof value === 'string' ? this.parseWebsocketData(value) : value;
 
+
     const result = this.schema.safeParse(transformedValue);
 
     // return the first error

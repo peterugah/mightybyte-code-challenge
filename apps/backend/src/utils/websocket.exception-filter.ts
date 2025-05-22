@@ -24,9 +24,6 @@ export class WebsocketExtensionFilter extends BaseExceptionFilter {
     const client = host.switchToWs().getClient<Socket>();
 
     const error = exception.getResponse() as ErrorInterface;
-
-    Logger.log({ errorMessage: error.message })
-
     // Emit error only to the client who made a request
     const response: WebSocketErrorResponse = {
       clientId: client.id,
@@ -35,6 +32,7 @@ export class WebsocketExtensionFilter extends BaseExceptionFilter {
       statusCode:
         Number(error?.cause) || error?.statusCode || error?.response?.statusCode || 500, // INFO: this is the status code of the error
     };
+    Logger.error(this.catch.name, error)
     client.emit(WebsocketEvents.WEBSOCKET_ERROR, response);
   }
 }

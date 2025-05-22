@@ -5,7 +5,10 @@ import { driverStore } from "../../store/driver.store";
 import { AppSocket } from "../../utils/socket";
 import Controls from "./Controls";
 import { generateRandomCoordinates } from "../../utils/utils";
-import type { UpdateDriveLocationDto } from "@monorepo/shared";
+import type {
+	UpdateDriveLocationDto,
+	WebSocketErrorResponse,
+} from "@monorepo/shared";
 
 type actions = "login" | "controls";
 
@@ -38,12 +41,10 @@ function Driver() {
 	};
 
 	const handleErrors = () => {
-		// client.current
-		// 	?.on<WebSocketErrorResponse>("WEBSOCKET_ERROR")
-		// 	.then((res) => {
-		// 		// check if token is expired
-		// 		handleExpiredTokenError(res.statusCode);
-		// 	});
+		client.current?.on<WebSocketErrorResponse>("WEBSOCKET_ERROR", (res) => {
+			console.log({ res });
+			handleExpiredTokenError(res.statusCode);
+		});
 	};
 
 	const handleOnLogin = () => {
@@ -54,7 +55,7 @@ function Driver() {
 
 	useEffect(() => {
 		handleErrors();
-		return () => {};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (
