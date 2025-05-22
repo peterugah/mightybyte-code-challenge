@@ -6,11 +6,6 @@ import { AppSocket } from "../../utils/socket";
 import Controls from "./Controls";
 import { generateRandomCoordinates } from "../../utils/utils";
 import type { UpdateDriveLocationDto } from "@monorepo/shared";
-// import {
-// 	type UpdateDriveLocationDto,
-// 	type WebSocketErrorResponse,
-// } from "@monorepo/shared";
-// import { generateRandomCoordinates } from "../../utils/utils";
 
 type actions = "login" | "controls";
 
@@ -23,7 +18,7 @@ function Driver() {
 		const socket = io(import.meta.env.VITE_WEBSOCKET_URL, {
 			transports: ["websocket"],
 		});
-		client.current = new AppSocket(socket, details!.token || "");
+		client.current = new AppSocket(socket, details?.token || "");
 	};
 
 	const handleOnUpdateDriverLocationOnce = () => {
