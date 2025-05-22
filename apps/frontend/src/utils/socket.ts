@@ -4,11 +4,15 @@ import type { Socket } from "socket.io-client";
 export class AppSocket {
   socket: Socket;
   token: string;
+  id: string | undefined = undefined;
 
   constructor(socket: Socket, token: string) {
     this.socket = socket;
     this.token = token;
+    this.id = socket.id
   }
+
+
 
   send<T, RT>(event: WebsocketEventType, payload: T): Promise<RT> {
     const p: WebSocketRequest<T> = {

@@ -48,15 +48,18 @@ function Driver() {
 	};
 
 	const handleOnLogin = () => {
-		// connect to websocket
 		setAction("controls");
-		connectToWebsocket();
 	};
 
 	useEffect(() => {
 		handleErrors();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
+
+	useEffect(() => {
+		connectToWebsocket();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [details]);
 
 	return (
 		<div>
