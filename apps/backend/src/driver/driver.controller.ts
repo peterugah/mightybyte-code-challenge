@@ -4,6 +4,7 @@ import {
   Post,
   UseGuards,
   BadRequestException,
+  Inject,
 } from '@nestjs/common';
 import { TokenPayload, ValidateToken } from 'src/jwt/jwt.decorator';
 import {
@@ -16,8 +17,10 @@ import { DriverService } from './driver.service';
 import { ZodValidationPipe } from 'src/utils/zod.pipe';
 import { TokenGuard } from 'src/jwt/jwt.guard';
 import { JwtService } from 'src/jwt/jwt.service';
-import { ConfigService } from '@nestjs/config';
-import { EnvEnum } from 'src/env/env.enum';
+import { BrokerServices } from 'src/broker/broker.enum';
+import { ClientProxy } from '@nestjs/microservices';
+import { DriverEvents } from './driver.enum';
+import { DriverLocationDetails } from './driver.type';
 
 @Controller('driver')
 @UseGuards(TokenGuard)
@@ -25,20 +28,29 @@ export class DriverController {
   constructor(
     private readonly driverService: DriverService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
+    @Inject(BrokerServices.DRIVER_SERVICE)
+    private readonly driverClient: ClientProxy,
   ) { }
+
   @ValidateToken()
   @Post('update')
-  updateLocation(
+  async updateLocation(
     @TokenPayload() token: TokenDto,
     @Body(new ZodValidationPipe(updateLocationValidatorSchema))
     payload: AddDriveLocationDto,
   ) {
-    return this.driverService.addLocation(payload, token.id);
+    const location = await this.driverService.addLocation(payload, token.id);
+    // INFO: broadcast the location event to all consumers
+    this.driverClient.emit(
+      DriverEvents.DRIVER_LOCATION_ADDED,
+      new DriverLocationDetails(location, location.driver),
+    );
+    return location;
   }
+
   /**
   INFO: 
-  When the driver's token expires, he gets a token expired error with a 600 statusCode for both an HTTP and WS connection.This endpoint is used to refresh the token which can then be used to make the request again and subsequent requests.
+  When the driver's token expires, he gets a token expired error with a 600 statusCode for both an HTTP and WS connection. This endpoint is used to refresh the token which can then be used to make the request again and subsequent requests.
  */
   @Post('refresh-token')
   async refreshToken(
@@ -50,7 +62,7 @@ export class DriverController {
       payload.refreshToken,
     );
     if (!driver) {
-      throw new BadRequestException(`unabled to refresh drivers's token`);
+      throw new BadRequestException(`Unabled to refresh drivers's token`);
     }
 
     const { token, refreshToken } = this.driverService.generateTokens(

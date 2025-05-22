@@ -1,11 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.WebsocketMessages = void 0;
-var WebsocketMessages;
-(function (WebsocketMessages) {
-    WebsocketMessages["UPDATE_DRIVER_LOCATION"] = "UPDATE_DRIVER_LOCATION";
-    WebsocketMessages["WEBSOCKET_ERROR"] = "WEBSOCKET_ERROR";
-    WebsocketMessages["REQUEST_DRIVER_DETAILS_AND_LOCATION"] = "REQUEST_DRIVER_DETAILS_AND_LOCATION";
-    WebsocketMessages["DRIVER_DETAILS_AND_LOCATION_RESPONSE"] = "DRIVER_DETAILS_AND_LOCATION_RESPONSE";
-    WebsocketMessages["OFFLINE_DRIVER"] = "OFFLINE_DRIVER";
-})(WebsocketMessages || (exports.WebsocketMessages = WebsocketMessages = {}));
+exports.WebsocketEvents = void 0;
+var WebsocketEvents;
+(function (WebsocketEvents) {
+    WebsocketEvents["UPDATE_DRIVER_LOCATION_IN_REALTIME"] = "UPDATE_DRIVER_LOCATION_IN_REALTIME";
+    WebsocketEvents["WEBSOCKET_ERROR"] = "WEBSOCKET_ERROR";
+    /** REALTIME */
+    WebsocketEvents["SUBSCRIBE_TO_DRIVER_LOCATION_UPDATE_IN_REALTIME"] = "SUBSCRIBE_TO_DRIVER_LOCATION_UPDATE_IN_REALTIME";
+    WebsocketEvents["DRIVER_DETAILS_AND_LOCATION_RESPONSE_REALTIME"] = "DRIVER_DETAILS_AND_LOCATION_RESPONSE_REALTIME";
+    /** EVERY FIVE SECONDS */
+    WebsocketEvents["REQUEST_DRIVER_DETAILS_AND_LOCATION_EVERY_FIVE_SECONDS"] = "REQUEST_DRIVER_DETAILS_AND_LOCATION_EVERY_FIVE_SECONDS";
+    WebsocketEvents["DRIVER_DETAILS_AND_LOCATION_RESPONSE_EVERY_FIVE_SECONDS"] = "DRIVER_DETAILS_AND_LOCATION_RESPONSE_EVERY_FIVE_SECONDS";
+    // 
+    WebsocketEvents["OFFLINE_DRIVER"] = "OFFLINE_DRIVER";
+})(WebsocketEvents || (exports.WebsocketEvents = WebsocketEvents = {}));

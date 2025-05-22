@@ -1,14 +1,14 @@
 @baseUrl = http://localhost:3000
 
 ### Replace @token with token received after logging in
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImE0ZjUzMTVhLWQ2ZTgtNGE3ZC1hYTVkLWI2MWIyYTFjZGFiNSIsImlhdCI6MTc0Nzg0NDUyMSwiZXhwIjoxNzQ3ODQ4MTIxfQ.qk2NKPgvv_sXnqNJRuDuNd0j4JR0n5Nb6eHdVnjiaGs
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzEsImlhdCI6MTc0Nzg2OTcwNiwiZXhwIjoxNzQ3ODcyNzA2fQ.uUwZK2B48zJddeXiLquC9YKLOygycczYZpuXY4MkU6A
 
 ### Login as a driver
 POST {{baseUrl}}/login 
 Content-Type: application/json
 
 {
-  "username":"driverthree",
+  "username":"driverone",
   "password":"demo"
 }
 
@@ -18,7 +18,7 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "latitude": 12,
+  "latitude": 70,
   "longitude": 0
 }
 ### Refresh the driver's token
@@ -26,5 +26,5 @@ POST {{baseUrl}}/driver/refresh-token
 Content-Type: application/json
 
 {
-  "refreshToken" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjgxNjFiNmQ2LTNiYWUtNDA2NC1hODBmLTA2MGQyMjEwMGYxMCIsImlhdCI6MTc0Nzg0NDU5NSwiZXhwIjoxNzQ3ODQ4MTk1fQ.5VTRwZe4IZiRKhnMSWg1Qx-5_85k15ocMYj_oHxdtxE"
+  "refreshToken" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY2ZDA4NWY2LTI1NzgtNDViZi1hYTE0LTQxYzE3NDU3ZDE0YiIsImlhdCI6MTc0Nzg1Mzg0MSwiZXhwIjoxNzQ3ODU3NDQxfQ.TAsn52-jNal1LnnDU_UDxG8jdiit3Z_N3Lt1auKFAhE"
 }

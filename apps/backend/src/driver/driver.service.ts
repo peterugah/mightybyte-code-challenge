@@ -20,6 +20,7 @@ import { JwtService } from 'src/jwt/jwt.service';
 import { DriverDetails } from './driver.type';
 import { v4 as uuid } from 'uuid';
 
+
 @Injectable()
 export class DriverService implements OnModuleInit {
   constructor(
@@ -27,11 +28,17 @@ export class DriverService implements OnModuleInit {
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
   ) { }
+
   onModuleInit() {
     void this.generateDemoDrivers()
       .then(() => {
         // print the details of the drivers
-        return this.prismaService.driver.findMany();
+        return this.prismaService.driver.findMany({
+          select: {
+            id: true,
+            username: true,
+          }
+        });
       })
       .then((drivers) => {
         Logger.debug({ drivers });
@@ -99,6 +106,9 @@ export class DriverService implements OnModuleInit {
 
   private getDriverDetails(driver: Driver): DriverDetails {
     return {
+      id: driver.id,
+      createdAt: driver.createdAt,
+      username: driver.username,
       firstName: driver.firstName,
       image: driver.image,
       lastName: driver.lastName,
@@ -202,6 +212,23 @@ export class DriverService implements OnModuleInit {
         ...payload,
         driverId,
       },
+      select: {
+        id: true,
+        driverId: true,
+        latitude: true,
+        longitude: true,
+        timestamp: true,
+        driver: {
+          select: {
+            id: true,
+            image: true,
+            createdAt: true,
+            firstName: true,
+            lastName: true,
+            username: true
+          }
+        }
+      }
     });
   }
 
