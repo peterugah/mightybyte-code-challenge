@@ -1,4 +1,4 @@
-import { WebSocketErrorResponse, WebsocketMessages } from '@monorepo/shared';
+import { WebSocketErrorResponse, WebsocketEvents } from '@monorepo/shared';
 import { ArgumentsHost, Catch, HttpException } from '@nestjs/common';
 import { BaseExceptionFilter } from '@nestjs/core';
 import { Socket } from 'socket.io';
@@ -36,6 +36,6 @@ export class WebsocketExtensionFilter extends BaseExceptionFilter {
       statusCode:
         error?.cause || error?.statusCode || error?.response?.statusCode || 500, // INFO: this is the status code of the error
     };
-    client.emit(WebsocketMessages.WEBSOCKET_ERROR, response);
+    client.emit(WebsocketEvents.WEBSOCKET_ERROR, response);
   }
 }

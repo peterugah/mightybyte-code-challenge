@@ -22,15 +22,18 @@ export class JwtService implements OnModuleInit {
     return jwt.sign({ id }, this.secret, { expiresIn }); //expires in 5 minutes
   }
 
-  private getErrorMessage(err: jwt.VerifyErrors) {
+  private getErrorMessage(
+    err: jwt.VerifyErrors,
+    type: 'token' | 'refresh token',
+  ) {
     switch (err.name) {
       case 'TokenExpiredError':
-        return 'Token expired, refresh the token';
+        return `${type} expired`;
       case 'JsonWebTokenError':
       case 'NotBeforeError':
-        return 'Invalid token provided';
+        return `Invalid ${type} provided`;
       default:
-        return 'Invalid token provided';
+        return `Invalid ${type} provided`;
     }
   }
   verifyToken(token: string) {
@@ -38,7 +41,7 @@ export class JwtService implements OnModuleInit {
       jwt.verify(token, this.secret, (err, decoded: TokenDto) => {
         if (err) {
           reject(
-            new BadRequestException(this.getErrorMessage(err), {
+            new BadRequestException(this.getErrorMessage(err, 'token'), {
               cause: CustomHttpCodes.TOKEN_EXPIRED,
             }),
           );
@@ -53,9 +56,12 @@ export class JwtService implements OnModuleInit {
       jwt.verify(refreshToken, this.secret, (err, decoded: RefreshTokenDto) => {
         if (err) {
           reject(
-            new BadRequestException(this.getErrorMessage(err), {
-              cause: CustomHttpCodes.REFRESH_TOKEN_EXPIRED,
-            }),
+            new BadRequestException(
+              this.getErrorMessage(err, 'refresh token'),
+              {
+                cause: CustomHttpCodes.REFRESH_TOKEN_EXPIRED,
+              },
+            ),
           );
         }
         resolve(decoded);
