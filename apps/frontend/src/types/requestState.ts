@@ -1,0 +1,1 @@
+export type requestState = "loading" | "error" | "idle"
