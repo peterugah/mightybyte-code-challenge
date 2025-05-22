@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  Logger,
   NotFoundException,
   OnModuleInit,
 } from '@nestjs/common';
@@ -30,18 +29,6 @@ export class DriverService implements OnModuleInit {
 
   onModuleInit() {
     void this.generateDemoDrivers()
-      .then(() => {
-        // print the details of the drivers
-        return this.prismaService.driver.findMany({
-          select: {
-            id: true,
-            username: true,
-          },
-        });
-      })
-      .then((drivers) => {
-        Logger.debug({ drivers });
-      });
   }
 
   allDrivers() {
@@ -194,14 +181,16 @@ export class DriverService implements OnModuleInit {
         username: true,
         firstName: true,
         lastName: true,
+        createdAt: true,
         image: true,
-
         locations: {
           orderBy: {
             timestamp: 'desc',
           },
           take: 1,
           select: {
+            id: true,
+            driverId: true,
             timestamp: true,
             latitude: true,
             longitude: true,

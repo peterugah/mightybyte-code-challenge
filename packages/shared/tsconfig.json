@@ -11,10 +11,6 @@
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"strict": true
-
-		// "moduleResolution": "node",
-		// "target": "ES2023",
-		// "module": "CommonJS"
 	},
 	"include": ["src/**/*"]
 }

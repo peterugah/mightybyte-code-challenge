@@ -6,6 +6,6 @@ export const CustomHttpCodes = {
 } as const;
 
 // union type: 600 | 601
-export type CustomHttpCode = typeof CustomHttpCodes[keyof typeof CustomHttpCodes];
+export type CustomHttpCodesValue = typeof CustomHttpCodes[keyof typeof CustomHttpCodes];
 
 
