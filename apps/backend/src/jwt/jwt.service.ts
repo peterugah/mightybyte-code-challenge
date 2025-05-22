@@ -15,11 +15,11 @@ export class JwtService implements OnModuleInit {
   }
 
   generateToken({ id, expiresIn }: TokenDto) {
-    return jwt.sign({ id }, this.secret, { expiresIn }); //expires in 5 minutes
+    return jwt.sign({ id }, this.secret, { expiresIn });
   }
 
   generateRefreshToken({ id, expiresIn }: RefreshTokenDto) {
-    return jwt.sign({ id }, this.secret, { expiresIn }); //expires in 5 minutes
+    return jwt.sign({ id }, this.secret, { expiresIn });
   }
 
   private getErrorMessage(

@@ -50,7 +50,7 @@ export class DriverController {
 
   /**
   INFO: 
-  When the driver's token expires, he gets a token expired error with a 600 statusCode for both an HTTP and WS connection. This endpoint is used to refresh the token which can then be used to make the request again and subsequent requests.
+    When the driver's token expires, he gets a token expired error with a 600 statusCode for both an HTTP and WS connection. This endpoint is used to refresh the token which can then be used to make the request again and subsequent requests.
  */
   @Post('refresh-token')
   async refreshToken(
