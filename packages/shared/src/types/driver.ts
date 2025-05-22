@@ -7,9 +7,12 @@ export interface DriverLoginResponse {
   token: string;
   refreshToken: string;
   driver: {
+    id: number;
+    createdAt: Date;
     firstName: string;
     lastName: string;
     image: string;
+    username: string;
   }
 }
 

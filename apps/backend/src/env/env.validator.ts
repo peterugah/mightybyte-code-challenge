@@ -5,6 +5,7 @@ const envValidatorSchema = z.object({
   [EnvEnum.PORT]: z.coerce.number(),
   [EnvEnum.JWT_SECRET]: z.string(),
   [EnvEnum.DATABASE_URL]: z.string(),
+  [EnvEnum.BROKER_PORT]: z.coerce.number(),
   [EnvEnum.JWT_EXPIRATION]: z.coerce.number(),
   [EnvEnum.PASSWORD_SALT_ROUNDS]: z.coerce.number(),
   [EnvEnum.JWT_REFRESH_EXPIRATION]: z.coerce.number(),

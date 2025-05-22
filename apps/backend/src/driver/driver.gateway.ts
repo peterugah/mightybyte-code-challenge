@@ -6,6 +6,7 @@ import {
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayConnection,
   SubscribeMessage,
   WebSocketGateway,
   WsResponse,
@@ -15,7 +16,7 @@ import {
   updateLocationValidatorSchema,
 } from './driver.validator';
 import { ZodValidationPipe } from 'src/utils/zod.pipe';
-import { UseFilters, UseGuards } from '@nestjs/common';
+import { Logger, UseFilters, UseGuards } from '@nestjs/common';
 import { WebsocketExtensionFilter } from 'src/utils/websocket.exception-filter';
 import { TokenGuard } from 'src/jwt/jwt.guard';
 import { TokenPayload, ValidateToken } from 'src/jwt/jwt.decorator';
@@ -44,7 +45,7 @@ import { DriverLocationDetails } from './driver.type';
 @WebSocketGateway()
 @UseGuards(TokenGuard)
 @UseFilters(WebsocketExtensionFilter)
-export class DriverWebsocketGateway {
+export class DriverWebsocketGateway implements OnGatewayConnection {
   private readonly DRIVER_ROOM_PREFIX = 'driver_';
 
   @WebSocketServer()
@@ -55,6 +56,9 @@ export class DriverWebsocketGateway {
     @Inject(BrokerServices.DRIVER_SERVICE)
     private readonly driverClient: ClientProxy,
   ) { }
+  handleConnection(client: Socket) {
+    Logger.debug({ clientId: client.id })
+  }
 
   emitDriverLocationUpdate(payload: DriverLocationDetails) {
     // emit updates to the room

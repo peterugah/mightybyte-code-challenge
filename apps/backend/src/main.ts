@@ -2,10 +2,14 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { Logger } from '@nestjs/common';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { ConfigService } from '@nestjs/config';
+import { EnvEnum } from './env/env.enum';
 
 async function bootstrap() {
   const PORT = process.env.PORT || 3000;
   const app = await NestFactory.create(AppModule);
+  const config = app.get(ConfigService);
+  app.enableCors()
   /**
     INFO: 
     This is simulating the connection to a message broker like kafka or rabbitMQ. 
@@ -13,6 +17,7 @@ async function bootstrap() {
    */
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.TCP,
+    options: { port: config.get<number>(EnvEnum.BROKER_PORT) }
   });
 
   await app.startAllMicroservices();
