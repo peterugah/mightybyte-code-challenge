@@ -2,9 +2,13 @@
   "name": "@monorepo/shared",
   "version": "1.0.0",
   "main": "dist/index.js",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "dev": "tsc -b tsconfig.json --watch"
+    "dev": "yarn build && yarn build:cjs && yarn build:esm",
+    "build": "tsc -b tsconfig.json --watch",
+    "build:cjs": "tsc -b tsconfig.cjs.json --watch",
+    "build:esm": "tsc -b tsconfig.esm.json --watch"
   },
   "keywords": [],
   "author": "",

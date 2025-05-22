@@ -1,3 +1,4 @@
+import Client from "./components/client/Client";
 import Driver from "./components/driver/Driver";
 import "./index.css";
 function App() {
@@ -6,7 +7,9 @@ function App() {
 			<div className="flex-1 p-2">
 				<Driver />
 			</div>
-			<div className="flex-1 p-2">{/* TODO: client */}</div>
+			<div className="flex-1 p-2">
+				<Client />
+			</div>
 		</div>
 	);
 }
