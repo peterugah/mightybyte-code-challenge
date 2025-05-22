@@ -37,6 +37,6 @@ export class ZodValidationPipe implements PipeTransform {
         'error validating request input schema',
       );
     }
-    return result.data;
+    return result.data as unknown;
   }
 }

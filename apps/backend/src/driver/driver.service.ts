@@ -20,7 +20,6 @@ import { JwtService } from 'src/jwt/jwt.service';
 import { DriverDetails } from './driver.type';
 import { v4 as uuid } from 'uuid';
 
-
 @Injectable()
 export class DriverService implements OnModuleInit {
   constructor(
@@ -37,7 +36,7 @@ export class DriverService implements OnModuleInit {
           select: {
             id: true,
             username: true,
-          }
+          },
         });
       })
       .then((drivers) => {
@@ -225,10 +224,10 @@ export class DriverService implements OnModuleInit {
             createdAt: true,
             firstName: true,
             lastName: true,
-            username: true
-          }
-        }
-      }
+            username: true,
+          },
+        },
+      },
     });
   }
 
