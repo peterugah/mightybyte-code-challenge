@@ -2,9 +2,10 @@ import type { DriverLoginDto } from "@monorepo/shared";
 import { create } from "zustand"
 import { driverClient } from "../clients/driver.client";
 import type { requestState } from "../types/requestState";
+import { persist } from "zustand/middleware";
 
 interface DriverDetails {
-  id?: string;
+  id?: number;
   firstName?: string;
   lastName?: string;
   image?: string;
@@ -19,13 +20,24 @@ interface DriverStore {
 const initialState: DriverStore = {
   requestState: 'idle'
 }
-const store = create(() => initialState)
+const store = create<DriverStore>()(
+  persist(
+    () => initialState,
+    {
+      name: "driver-store",
+    }
+  )
+);
+
 
 const setRequestState = (requestState: requestState) => {
   store.setState({ requestState })
 }
 const setDetails = (details: DriverDetails) => {
   store.setState({ details })
+}
+const reset = () => {
+  store.setState(initialState)
 }
 
 const login = async (payload: DriverLoginDto) => {
@@ -41,5 +53,6 @@ const login = async (payload: DriverLoginDto) => {
 
 export const driverStore = {
   store,
+  reset,
   login
 }

@@ -5,13 +5,14 @@ import {
   UseGuards,
   BadRequestException,
   Inject,
+  Get,
 } from '@nestjs/common';
 import { TokenPayload, ValidateToken } from 'src/jwt/jwt.decorator';
 import {
   refreshTokenValidatorSchema,
   updateLocationValidatorSchema,
 } from './driver.validator';
-import { AddDriveLocationDto, RefreshDriverTokenDto } from '@monorepo/shared';
+import { UpdateDriveLocationDto, RefreshDriverTokenDto } from '@monorepo/shared';
 import { TokenDto } from 'src/jwt/jwt.type';
 import { DriverService } from './driver.service';
 import { ZodValidationPipe } from 'src/utils/zod.pipe';
@@ -32,12 +33,17 @@ export class DriverController {
     private readonly driverClient: ClientProxy,
   ) { }
 
+  @Get()
+  allDrivers() {
+    return this.driverService.allDrivers();
+  }
+
   @ValidateToken()
   @Post('update')
   async updateLocation(
     @TokenPayload() token: TokenDto,
     @Body(new ZodValidationPipe(updateLocationValidatorSchema))
-    payload: AddDriveLocationDto,
+    payload: UpdateDriveLocationDto,
   ) {
     const location = await this.driverService.addLocation(payload, token.id);
     // INFO: broadcast the location event to all consumers

@@ -14,7 +14,7 @@ import { EnvEnum } from 'src/env/env.enum';
 import {
   DriverLoginDto,
   DriverLoginResponse,
-  AddDriveLocationDto,
+  UpdateDriveLocationDto,
 } from '@monorepo/shared';
 import { JwtService } from 'src/jwt/jwt.service';
 import { DriverDetails } from './driver.type';
@@ -42,6 +42,19 @@ export class DriverService implements OnModuleInit {
       .then((drivers) => {
         Logger.debug({ drivers });
       });
+  }
+
+  allDrivers() {
+    return this.prismaService.driver.findMany({
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        image: true,
+        createdAt: true,
+        username: true,
+      }
+    })
   }
   private async generateDemoDrivers() {
     const count = await this.prismaService.driver.count();
@@ -205,7 +218,7 @@ export class DriverService implements OnModuleInit {
     return record;
   }
 
-  addLocation(payload: AddDriveLocationDto, driverId: number) {
+  addLocation(payload: UpdateDriveLocationDto, driverId: number) {
     return this.prismaService.location.create({
       data: {
         ...payload,

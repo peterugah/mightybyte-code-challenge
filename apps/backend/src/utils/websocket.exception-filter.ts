@@ -1,5 +1,5 @@
 import { WebSocketErrorResponse, WebsocketEvents } from '@monorepo/shared';
-import { ArgumentsHost, Catch, HttpException } from '@nestjs/common';
+import { ArgumentsHost, Catch, HttpException, Logger, } from '@nestjs/common';
 import { BaseExceptionFilter } from '@nestjs/core';
 import { Socket } from 'socket.io';
 
@@ -24,9 +24,8 @@ export class WebsocketExtensionFilter extends BaseExceptionFilter {
     const client = host.switchToWs().getClient<Socket>();
 
     const error = exception.getResponse() as ErrorInterface;
-    console.log(error);
 
-    console.log('getting here: ', JSON.stringify(error, null, 2));
+    Logger.log({ errorMessage: error.message })
 
     // Emit error only to the client who made a request
     const response: WebSocketErrorResponse = {
@@ -34,7 +33,7 @@ export class WebsocketExtensionFilter extends BaseExceptionFilter {
       message:
         error.message || error?.response?.message || 'unknown error occurred',
       statusCode:
-        error?.cause || error?.statusCode || error?.response?.statusCode || 500, // INFO: this is the status code of the error
+        Number(error?.cause) || error?.statusCode || error?.response?.statusCode || 500, // INFO: this is the status code of the error
     };
     client.emit(WebsocketEvents.WEBSOCKET_ERROR, response);
   }

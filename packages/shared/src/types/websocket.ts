@@ -6,5 +6,5 @@ export interface WebSocketRequest<T> {
 export interface WebSocketErrorResponse {
   clientId: string;
   message: string;
-  statusCode: number | string;
+  statusCode: number;
 }

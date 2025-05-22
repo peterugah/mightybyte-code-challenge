@@ -1,5 +1,5 @@
 import {
-  AddDriveLocationDto,
+  UpdateDriveLocationDto,
   GetDriverDetailsAndLocationDto,
   WebsocketEvents,
 } from '@monorepo/shared';
@@ -72,12 +72,13 @@ export class DriverWebsocketGateway implements OnGatewayConnection {
   }
 
   @ValidateToken()
-  @SubscribeMessage(WebsocketEvents.UPDATE_DRIVER_LOCATION_IN_REALTIME)
+  @SubscribeMessage(WebsocketEvents.UPDATE_DRIVER_LOCATION)
   async onUpdateDriverLocation(
     @TokenPayload() token: TokenDto,
     @MessageBody(new ZodValidationPipe(updateLocationValidatorSchema))
-    payload: AddDriveLocationDto,
+    payload: UpdateDriveLocationDto,
   ) {
+    Logger.debug({ payload })
     const location = await this.driverService.addLocation(payload, token.id);
     // INFO: broadcast the location event to all consumers
     this.driverClient.emit(

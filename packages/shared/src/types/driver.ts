@@ -16,7 +16,7 @@ export interface DriverLoginResponse {
   }
 }
 
-export interface AddDriveLocationDto {
+export interface UpdateDriveLocationDto {
   latitude: number;
   longitude: number;
 }

@@ -1,7 +1,11 @@
-/**
- * This enum defines internal http codes for the project
- */
-export enum CustomHttpCodes {
-  TOKEN_EXPIRED = 600,
-  REFRESH_TOKEN_EXPIRED = 601,
-}
+// codes.ts
+
+export const CustomHttpCodes = {
+  TOKEN_EXPIRED: 600,
+  REFRESH_TOKEN_EXPIRED: 601,
+} as const;
+
+// union type: 600 | 601
+export type CustomHttpCode = typeof CustomHttpCodes[keyof typeof CustomHttpCodes];
+
+
