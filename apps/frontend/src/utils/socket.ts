@@ -4,17 +4,13 @@ import type { Socket } from "socket.io-client";
 export class AppSocket {
   socket: Socket;
   token: string;
-  id: string | undefined = undefined;
 
   constructor(socket: Socket, token: string) {
     this.socket = socket;
     this.token = token;
-    this.id = socket.id
   }
 
-
-
-  send<T, RT>(event: WebsocketEventType, payload: T): Promise<RT> {
+  emit<T, RT>(event: WebsocketEventType, payload: T): Promise<RT> {
     const p: WebSocketRequest<T> = {
       token: this.token,
       payload,
@@ -24,25 +20,16 @@ export class AppSocket {
     });
   }
 
-
   on<T>(event: WebsocketEventType, handler: (response: T) => void): void {
     this.socket.on(event, handler);
   }
 
   off<T>(event: WebsocketEventType, handler?: (response: T) => void): void {
-    // If handler is provided, remove that listener; otherwise remove all listeners for the event
     if (handler) {
       this.socket.off(event, handler);
     } else {
-      this.socket.off(event);
+      this.socket.removeAllListeners(event);
     }
   }
-
-  offAll(): void {
-    this.socket.removeAllListeners();
-  }
-
-  once<T>(event: WebsocketEventType, handler: (response: T) => void): void {
-    this.socket.once(event, handler);
-  }
 }
+

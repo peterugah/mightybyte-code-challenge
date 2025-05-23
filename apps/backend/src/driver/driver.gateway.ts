@@ -126,9 +126,6 @@ export class DriverWebsocketGateway implements OnGatewayConnection {
     const disconnect$ = fromEvent(client, 'disconnect');
     const pollInterval$ = new BehaviorSubject<number>(0);
 
-    // subscribe the user to the room 
-    this.joinRoom(payload.id, client)
-
     return pollInterval$.pipe(
       switchMap((intervalMs) => interval(intervalMs)),
       takeUntil(disconnect$),
@@ -154,7 +151,7 @@ export class DriverWebsocketGateway implements OnGatewayConnection {
         return {
           event: isOffline
             ? WebsocketEvents.OFFLINE_DRIVER
-            : WebsocketEvents.DRIVER_DETAILS_AND_LOCATION_RESPONSE,
+            : WebsocketEvents.DRIVER_DETAILS_AND_LOCATION_RESPONSE_EVERY_FIVE_SECONDS,
           data: {
             message: isOffline
               ? 'Driver has been offline for a while now'
