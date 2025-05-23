@@ -5,7 +5,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "turbo dev"
+    "dev:shared": "turbo  dev --filter=@monorepo/shared",
+    "dev:backend": "turbo  dev --filter=@monorepo/backend",
+    "dev:frontend": "turbo  dev --filter=@monorepo/frontend",
+    "dev": "turbo dev",
+    "start": "turbo start"
   },
   "workspaces": [
     "apps/*",

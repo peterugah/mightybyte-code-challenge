@@ -17,19 +17,30 @@ function Driver() {
 	const client = useRef<AppSocket>(undefined);
 	const [action, setAction] = useState<actions>("login");
 
+	const [clientId, setClientId] = useState<string>();
+
 	const connectToWebsocket = async () => {
 		const socket = io(import.meta.env.VITE_WEBSOCKET_URL, {
 			transports: ["websocket"],
 		});
 		client.current = new AppSocket(socket, details?.token || "");
+
+		socket.on("connect", () => {
+			setClientId(socket.id);
+		});
 	};
 
-	const handleOnUpdateDriverLocationOnce = () => {
+	const handleOnUpdateDriverLocation = () => {
 		const { latitude, longitude } = generateRandomCoordinates();
 		client.current?.emit<UpdateDriveLocationDto, unknown>(
 			"UPDATE_DRIVER_LOCATION",
 			{ latitude, longitude }
 		);
+	};
+
+	const handleLogout = () => {
+		driverStore.reset();
+		setAction("login");
 	};
 
 	const handleExpiredTokenError = (statusCode: number) => {
@@ -49,18 +60,21 @@ function Driver() {
 
 	useEffect(() => {
 		connectToWebsocket();
-		// websocket errors
 		client.current?.on<WebSocketErrorResponse>("WEBSOCKET_ERROR", handleErrors);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [details]);
 
+	// TODO: on component removal, clean websocket events
+
 	return (
 		<div>
 			<h1 className="text-3xl">Driver</h1>
+			<p>Client Id: {clientId}</p>
 			{action === "login" && <Login onLogin={handleOnLogin} />}
 			{action === "controls" && (
 				<Controls
-					onUpdateDriverLocationOnce={handleOnUpdateDriverLocationOnce}
+					onUpdateDriverLocation={handleOnUpdateDriverLocation}
+					onLogout={handleLogout}
 				/>
 			)}
 		</div>

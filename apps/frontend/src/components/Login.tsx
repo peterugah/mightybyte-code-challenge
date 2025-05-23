@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { driverStore } from "../store/driver.store";
 
 interface Login {
@@ -6,7 +6,7 @@ interface Login {
 }
 
 function Login({ onLogin }: Login) {
-	const { requestState, details } = driverStore.store();
+	const { requestState } = driverStore.store();
 	const [username, setUsername] = useState("driverone");
 	const [password, setPassword] = useState("demo");
 
@@ -24,14 +24,6 @@ function Login({ onLogin }: Login) {
 		// proceed to the next phase
 		onLogin();
 	};
-
-	/** redirect if already logged in */
-	useEffect(() => {
-		if (details) {
-			onLogin();
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
 
 	return (
 		<div className="flex flex-col gap-2">
