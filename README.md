@@ -18,7 +18,7 @@ This project is organized as a Turborepo monorepo, enabling simultaneous develop
 ### Folder structure
 
 - apps:
-  - backend (main codebase for evaluation)
+  - backend (main codebase)
   - frontend
 - packages
   - shared
