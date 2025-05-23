@@ -26,7 +26,7 @@ function Driver() {
 
 	const handleOnUpdateDriverLocationOnce = () => {
 		const { latitude, longitude } = generateRandomCoordinates();
-		client.current?.send<UpdateDriveLocationDto, unknown>(
+		client.current?.emit<UpdateDriveLocationDto, unknown>(
 			"UPDATE_DRIVER_LOCATION",
 			{ latitude, longitude }
 		);
@@ -34,29 +34,25 @@ function Driver() {
 
 	const handleExpiredTokenError = (statusCode: number) => {
 		if (statusCode === 600) {
-			// INFO: I'm not implementing the refresh token logic, I'll just prompt the user to log in again
 			driverStore.reset();
 			setAction("login");
 		}
 	};
 
-	const handleErrors = () => {
-		client.current?.on<WebSocketErrorResponse>("WEBSOCKET_ERROR", (res) => {
-			console.log({ res });
-			handleExpiredTokenError(res.statusCode);
-		});
+	const handleErrors = (res: WebSocketErrorResponse) => {
+		handleExpiredTokenError(res.statusCode);
 	};
 
 	const handleOnLogin = () => {
-		// connect to websocket
 		setAction("controls");
-		connectToWebsocket();
 	};
 
 	useEffect(() => {
-		handleErrors();
+		connectToWebsocket();
+		// websocket errors
+		client.current?.on<WebSocketErrorResponse>("WEBSOCKET_ERROR", handleErrors);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [details]);
 
 	return (
 		<div>

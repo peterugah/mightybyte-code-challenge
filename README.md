@@ -15,6 +15,14 @@ This project is organized as a Turborepo monorepo, enabling simultaneous develop
 
 ---
 
+### Folder structure
+
+- apps:
+  - backend (main codebase)
+  - frontend
+- packages
+  - shared
+
 ### Installation
 
 1. Clone the repository.

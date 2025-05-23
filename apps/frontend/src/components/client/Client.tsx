@@ -30,34 +30,41 @@ function Client() {
 		setDrivers(drivers);
 	};
 
-	const listenToDriverUpdatesRealtime = () => {
-		client.current?.on<DriverLocationDetailsResponse>(
+	const locationHandler = (response: DriverLocationDetailsResponse) => {
+		setLocations((prev) => [response, ...prev]);
+	};
+
+	const unsubscribeFromResponses = () => {
+		client.current?.off(
 			"DRIVER_DETAILS_AND_LOCATION_RESPONSE",
-			(response) => {
-				setLocations((prev) => [response, ...prev]);
-			}
+			locationHandler
 		);
+	};
+
+	const subscribeToResponse = () => {
+		unsubscribeFromResponses();
+		client.current?.on("DRIVER_DETAILS_AND_LOCATION_RESPONSE", locationHandler);
 	};
 
 	const subscribeToDriverRealtime = (id: number) => {
 		setLocations([]);
-		client.current?.send<GetDriverDetailsAndLocationDto, string>(
+		client.current?.emit<GetDriverDetailsAndLocationDto, string>(
 			"SUBSCRIBE_TO_DRIVER_LOCATION_UPDATE_IN_REALTIME",
 			{ id }
 		);
 	};
 	const subscribeToDriverEveryFiveSeconds = (id: number) => {
 		setLocations([]);
-		client.current?.send<GetDriverDetailsAndLocationDto, string>(
+		client.current?.emit<GetDriverDetailsAndLocationDto, string>(
 			"SUBSCRIBE_TO_DRIVER_LOCATION_UPDATE_EVERY_FIVE_SECONDS",
 			{ id }
 		);
+		subscribeToResponse();
 	};
 
 	useEffect(() => {
 		getAllDrivers();
 		connectToWebsocket();
-		listenToDriverUpdatesRealtime();
 	}, []);
 
 	return (

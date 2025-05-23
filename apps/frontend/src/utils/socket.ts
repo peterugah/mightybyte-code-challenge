@@ -10,7 +10,7 @@ export class AppSocket {
     this.token = token;
   }
 
-  send<T, RT>(event: WebsocketEventType, payload: T): Promise<RT> {
+  emit<T, RT>(event: WebsocketEventType, payload: T): Promise<RT> {
     const p: WebSocketRequest<T> = {
       token: this.token,
       payload,
@@ -20,25 +20,16 @@ export class AppSocket {
     });
   }
 
-
   on<T>(event: WebsocketEventType, handler: (response: T) => void): void {
     this.socket.on(event, handler);
   }
 
   off<T>(event: WebsocketEventType, handler?: (response: T) => void): void {
-    // If handler is provided, remove that listener; otherwise remove all listeners for the event
     if (handler) {
       this.socket.off(event, handler);
     } else {
-      this.socket.off(event);
+      this.socket.removeAllListeners(event);
     }
   }
-
-  offAll(): void {
-    this.socket.removeAllListeners();
-  }
-
-  once<T>(event: WebsocketEventType, handler: (response: T) => void): void {
-    this.socket.once(event, handler);
-  }
 }
+
