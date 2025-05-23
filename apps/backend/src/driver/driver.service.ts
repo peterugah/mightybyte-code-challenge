@@ -120,7 +120,6 @@ export class DriverService implements OnModuleInit {
       if more validation logic was required before logging in the user, I'd move those logic to a validation Pipe instead for better seperation of concern, then this method would strictly handled fetching the user details and confirming that the provided password matches. 
      */
 
-    //  TODO: check how to implement auto blocking of account if incorrect password is tried multiple times
     const driver = await this.prismaService.driver.findFirst({
       where: { username: data.username },
     });
