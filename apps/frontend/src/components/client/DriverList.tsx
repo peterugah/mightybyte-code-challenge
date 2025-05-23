@@ -15,7 +15,6 @@ function DriverList({
 	onSubscribeToDriverEveryFiveSeconds,
 }: DriverListProps) {
 	const [showIndex, setShowIndex] = useState(0);
-
 	return (
 		<div>
 			<ul>

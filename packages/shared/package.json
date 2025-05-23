@@ -6,9 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "dev": "yarn build && yarn build:cjs && yarn build:esm",
-    "build": "tsc -b tsconfig.json --watch",
-    "build:cjs": "tsc -b tsconfig.cjs.json --watch",
-    "build:esm": "tsc -b tsconfig.esm.json --watch"
+    "build": "tsc -b tsconfig.json --watch"
   },
   "keywords": [],
   "author": "",

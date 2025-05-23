@@ -8,8 +8,10 @@ function Locations({ locations }: LocationsProp) {
 		<div>
 			<ul>
 				{locations.map((location, index) => (
-					<li key={index}>
-						[{location.location.latitude} , {location.location.longitude}]
+					<li key={index} className="text-[16px]">
+						{location.driver.firstName} {location.driver.lastName}: [
+						{location.location.latitude} , {location.location.longitude}]{" "}
+						{location.message}
 					</li>
 				))}
 			</ul>

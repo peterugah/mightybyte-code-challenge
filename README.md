@@ -6,6 +6,8 @@ This is my solution to the [MightyByte Backend Challenge](https://docs.google.co
 
 ---
 
+![Demo](docs/images/demo.gif)
+
 ### Prerequisites
 
 - **Node.js** v20 (recommended)
@@ -115,9 +117,17 @@ All event names are defined in [`packages/shared/src/enums/websocket-messages.en
 
   Subscribe to a WebSocket room that streams live location updates for a specific driver.
 
+- **UNSUBSCRIBE_FROM_DRIVER_LOCATION_UPDATE**
+
+  Unsubscribe to a WebSocket room that streams live location updates for a specific driver.
+
 - **SUBSCRIBE_TO_DRIVER_LOCATION_UPDATE_EVERY_FIVE_SECONDS**
 
   Subscribe to periodic location updates (every 5 seconds) for a specific driver.
+
+- **UNSUBSCRIBE_TO_DRIVER_LOCATION_UPDATE_EVERY_FIVE_SECONDS**
+
+  Unsubscribe to periodic location updates (every 5 seconds) for a specific driver.
 
 - **DRIVER_DETAILS_AND_LOCATION_RESPONSE**
 
