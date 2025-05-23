@@ -9,7 +9,6 @@ import type {
 } from "@monorepo/shared";
 import DriverList from "./DriverList";
 import Locations from "./Locations";
-import { driverStore } from "../../store/driver.store";
 
 function Client() {
 	const client = useRef<AppSocket>(undefined);
@@ -19,16 +18,16 @@ function Client() {
 	const [locations, setLocations] = useState<DriverLocationDetailsResponse[]>(
 		[]
 	);
-	const { details } = driverStore.store();
 
 	const connectToWebsocket = async () => {
 		const socket = io(import.meta.env.VITE_WEBSOCKET_URL, {
 			transports: ["websocket"],
 		});
-		client.current = new AppSocket(socket, details?.token || "");
+		client.current = new AppSocket(socket, "");
 
 		socket.on("connect", () => {
 			setClientId(socket.id);
+			getAllDrivers();
 		});
 	};
 
@@ -84,7 +83,6 @@ function Client() {
 	};
 
 	useEffect(() => {
-		getAllDrivers();
 		connectToWebsocket();
 		listenToDriverOfflineEvent();
 		listentToDriverDetailsEvent();
