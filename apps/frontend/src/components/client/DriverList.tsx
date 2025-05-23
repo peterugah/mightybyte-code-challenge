@@ -4,11 +4,13 @@ import { useState } from "react";
 
 interface DriverListProps {
 	drivers: Driver[];
+	onDriverSelect: (id: number) => void;
 	onSubscribeToDriverRealtime: (id: number) => void;
 	onSubscribeToDriverEveryFiveSeconds: (id: number) => void;
 }
 function DriverList({
 	drivers,
+	onDriverSelect,
 	onSubscribeToDriverRealtime,
 	onSubscribeToDriverEveryFiveSeconds,
 }: DriverListProps) {
@@ -21,7 +23,10 @@ function DriverList({
 					<li key={item.id} className="before:content-['-'] before:mr-2 mb-2">
 						<button
 							className="cursor-pointer hover:text-neutral-200 text-blue-400 hover:underline"
-							onClick={() => setShowIndex(index)}
+							onClick={() => {
+								onDriverSelect(item.id);
+								setShowIndex(index);
+							}}
 						>
 							{item.firstName} {item.lastName}
 						</button>

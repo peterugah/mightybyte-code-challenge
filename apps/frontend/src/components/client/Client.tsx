@@ -14,6 +14,9 @@ function Client() {
 	const client = useRef<AppSocket>(undefined);
 
 	const [drivers, setDrivers] = useState<Driver[]>([]);
+	const [selectedDriver, setSelectedDriver] = useState<number | undefined>(
+		undefined
+	);
 	const [locations, setLocations] = useState<DriverLocationDetailsResponse[]>(
 		[]
 	);
@@ -34,37 +37,55 @@ function Client() {
 		setLocations((prev) => [response, ...prev]);
 	};
 
-	const unsubscribeFromResponses = () => {
-		client.current?.off(
-			"DRIVER_DETAILS_AND_LOCATION_RESPONSE",
-			locationHandler
-		);
+	const subscribeToResponse = () => {
+		client.current?.on("DRIVER_DETAILS_AND_LOCATION_RESPONSE", locationHandler);
 	};
 
-	const subscribeToResponse = () => {
-		unsubscribeFromResponses();
-		client.current?.on("DRIVER_DETAILS_AND_LOCATION_RESPONSE", locationHandler);
+	const unsubscribeFromDriverUpdates = () => {
+		client.current?.emit<string, string>(
+			"UNSUBSCRIBE_FROM_DRIVER_LOCATION_UPDATE",
+			""
+		);
+	};
+	const unsubscribeFromDriverUpdatesEveryFiveSeconds = (id: number) => {
+		client.current?.emit<GetDriverDetailsAndLocationDto, string>(
+			"UNSUBSCRIBE_FROM_DRIVER_LOCATION_UPDATE_EVERY_FIVE_SECONDS",
+			{ id }
+		);
 	};
 
 	const subscribeToDriverRealtime = (id: number) => {
 		setLocations([]);
+		setSelectedDriver(id);
+		unsubscribeFromDriverUpdatesEveryFiveSeconds(id);
 		client.current?.emit<GetDriverDetailsAndLocationDto, string>(
-			"SUBSCRIBE_TO_DRIVER_LOCATION_UPDATE_IN_REALTIME",
+			"SUBSCRIBE_TO_DRIVER_LOCATION_UPDATE",
 			{ id }
 		);
 	};
 	const subscribeToDriverEveryFiveSeconds = (id: number) => {
 		setLocations([]);
+		setSelectedDriver(id);
+		unsubscribeFromDriverUpdates();
 		client.current?.emit<GetDriverDetailsAndLocationDto, string>(
 			"SUBSCRIBE_TO_DRIVER_LOCATION_UPDATE_EVERY_FIVE_SECONDS",
 			{ id }
 		);
-		subscribeToResponse();
+	};
+
+	const handleOnDriverSelect = () => {
+		setLocations([]);
+		unsubscribeFromDriverUpdates();
+		if (selectedDriver) {
+			unsubscribeFromDriverUpdatesEveryFiveSeconds(selectedDriver);
+		}
 	};
 
 	useEffect(() => {
 		getAllDrivers();
 		connectToWebsocket();
+		subscribeToResponse();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (
@@ -73,6 +94,7 @@ function Client() {
 			<h2 className="text-1xl">Select Driver</h2>
 			<DriverList
 				drivers={drivers}
+				onDriverSelect={handleOnDriverSelect}
 				onSubscribeToDriverRealtime={subscribeToDriverRealtime}
 				onSubscribeToDriverEveryFiveSeconds={subscribeToDriverEveryFiveSeconds}
 			/>

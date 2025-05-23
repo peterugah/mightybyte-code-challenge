@@ -7,6 +7,7 @@ import {
   ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
+  OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WsResponse,
@@ -23,7 +24,6 @@ import { TokenPayload, ValidateToken } from 'src/jwt/jwt.decorator';
 import { TokenDto } from 'src/jwt/jwt.type';
 import { DriverService } from './driver.service';
 import {
-  from,
   fromEvent,
   map,
   Observable,
@@ -45,8 +45,9 @@ import { DriverLocationDetails } from './driver.type';
 @WebSocketGateway()
 @UseGuards(TokenGuard)
 @UseFilters(WebsocketExtensionFilter)
-export class DriverWebsocketGateway implements OnGatewayConnection {
+export class DriverWebsocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly DRIVER_ROOM_PREFIX = 'driver_';
+  private pollingSubjects = new Map<string, BehaviorSubject<number>>();
 
   @WebSocketServer()
   server: Server;
@@ -56,10 +57,22 @@ export class DriverWebsocketGateway implements OnGatewayConnection {
     @Inject(BrokerServices.DRIVER_SERVICE)
     private readonly driverClient: ClientProxy,
   ) { }
+
   handleConnection(client: Socket) {
     Logger.debug({ clientId: client.id })
   }
 
+  handleDisconnect(client: Socket) {
+    // clean up the polling subjects on disconnect
+    [...this.pollingSubjects.keys()]
+      .filter((k) => k.startsWith(client.id + '-'))
+      .forEach((k) => this.cleanup(k));
+  }
+
+  /**
+    INFO: 
+    This emits the driver location in realtime to all clients listening for it. 
+   */
   emitDriverLocationUpdate(payload: DriverLocationDetails) {
     // emit updates to the room
     const room = `${this.DRIVER_ROOM_PREFIX}${payload.driver.id}`;
@@ -89,22 +102,25 @@ export class DriverWebsocketGateway implements OnGatewayConnection {
 
 
   joinRoom(id: number, client: Socket) {
-    const rooms = Array.from(client.rooms);
-    // if the user is already listening for a different driver, remove them from the room
-    for (const room of rooms) {
-      if (room.startsWith(this.DRIVER_ROOM_PREFIX)) {
-        void client.leave(room);
-      }
-    }
-    // add the client to the room listening for updates from the selected driver
+    this.leaveRooms(client);
     const room = `${this.DRIVER_ROOM_PREFIX}${id}`;
     void client.join(room);
     Logger.debug(this.joinRoom.name, `joined room ${room}`)
     return room;
   }
 
+  leaveRooms(client: Socket) {
+    // leave any active driver rooms 
+    const rooms = Array.from(client.rooms);
+    for (const room of rooms) {
+      if (room.startsWith(this.DRIVER_ROOM_PREFIX)) {
+        void client.leave(room);
+      }
+    }
+  }
+
   @SubscribeMessage(
-    WebsocketEvents.SUBSCRIBE_TO_DRIVER_LOCATION_UPDATE_IN_REALTIME,
+    WebsocketEvents.SUBSCRIBE_TO_DRIVER_LOCATION_UPDATE,
   )
   subscribeToDriver(
     @ConnectedSocket() client: Socket,
@@ -113,53 +129,107 @@ export class DriverWebsocketGateway implements OnGatewayConnection {
     )
     payload: GetDriverDetailsAndLocationDto,
   ) {
-    return this.joinRoom(payload.id, client)
+    this.joinRoom(payload.id, client)
   }
 
+  @SubscribeMessage(
+    WebsocketEvents.UNSUBSCRIBE_FROM_DRIVER_LOCATION_UPDATE,
+  )
+  unsubscribeFromDriverRealtimeUpdates(
+    @ConnectedSocket() client: Socket,
+  ) {
+    this.leaveRooms(client)
+  }
+
+  @SubscribeMessage(WebsocketEvents.UNSUBSCRIBE_FROM_DRIVER_LOCATION_UPDATE_EVERY_FIVE_SECONDS)
+  handleUnsubscribe(
+    @ConnectedSocket() client: Socket,
+    @MessageBody(
+      new ZodValidationPipe(getDriverDetailsAndLocationValidatorSchema),
+    )
+    payload: GetDriverDetailsAndLocationDto,
+  ) {
+    Logger.debug(this.handleUnsubscribe.name, { unsubscribe: true, payload })
+    const key = this.generateSubscriptionKey(client.id, payload.id);
+    const subject = this.pollingSubjects.get(key);
+    Logger.log({ key })
+    if (subject) {
+      subject.complete();
+      this.pollingSubjects.delete(key);
+    }
+  }
+  /**
+    INFO: 
+    This fetches the last location of the driver every 5 seconds from the data base and broadcasts that to the connected client. if the location is older than 10 minutes, then a OFFLINE_DRIVER event is fired every 1 minute.
+   */
   @SubscribeMessage(
     WebsocketEvents.SUBSCRIBE_TO_DRIVER_LOCATION_UPDATE_EVERY_FIVE_SECONDS,
   )
   getDriverDetailsAndLocation(
     @ConnectedSocket() client: Socket,
-    @MessageBody(new ZodValidationPipe(getDriverDetailsAndLocationValidatorSchema)) payload: GetDriverDetailsAndLocationDto,
+    @MessageBody(
+      new ZodValidationPipe(getDriverDetailsAndLocationValidatorSchema),
+    )
+    payload: GetDriverDetailsAndLocationDto,
   ): Observable<WsResponse<any>> {
-    const disconnect$ = fromEvent(client, 'disconnect');
+    const key = this.generateSubscriptionKey(client.id, payload.id);
+
+    // if the client re-subscribes, clean up the old one
+    if (this.pollingSubjects.has(key)) {
+      this.pollingSubjects.get(key)!.complete();
+      this.pollingSubjects.delete(key);
+    }
+
     const pollInterval$ = new BehaviorSubject<number>(0);
+    this.pollingSubjects.set(key, pollInterval$);
+
+    Logger.log({ key })
+
+    const disconnect$ = fromEvent(client, 'disconnect').pipe(
+      tap(() => this.cleanup(key)),
+    );
 
     return pollInterval$.pipe(
-      switchMap((intervalMs) => interval(intervalMs)),
+      switchMap((ms) => interval(ms)),
       takeUntil(disconnect$),
-      switchMap(() =>
-        from(this.driverService.getDetailsAndLastLocation(payload.id)),
-      ),
+      switchMap(() => this.driverService.getDetailsAndLastLocation(payload.id)),
       map((details) => {
-        const location = details.locations[0]
-        const responseMapping = new DriverLocationDetails(location, details)
+        const location = details.locations[0];
+        const resp = new DriverLocationDetails(location, details);
         const hasLocation = details.locations.length > 0;
-        if (!hasLocation) {
-          return { details: responseMapping, isOffline: true };
-        }
-        const timestamp = details.locations[0].timestamp.toISOString();
-        const isOffline = this.driverService.isOlderThanTenMinutes(timestamp);
-        return { details: responseMapping, isOffline };
+        const isOffline = !hasLocation
+          ? true
+          : this.driverService.isOlderThanTenMinutes(
+            details.locations[0].timestamp.toISOString(),
+          );
+        return { details: resp, isOffline };
       }),
-
       tap(({ isOffline }) => {
         pollInterval$.next(isOffline ? 60_000 : 5_000);
       }),
-      map(({ details, isOffline }) => {
-        return {
-          event: isOffline
-            ? WebsocketEvents.OFFLINE_DRIVER
-            : WebsocketEvents.DRIVER_DETAILS_AND_LOCATION_RESPONSE_EVERY_FIVE_SECONDS,
-          data: {
-            message: isOffline
-              ? 'Driver has been offline for a while now'
-              : 'Driver is online',
-            ...details,
-          },
-        }
-      }),
+      map(({ details, isOffline }) => ({
+        event: isOffline
+          ? WebsocketEvents.OFFLINE_DRIVER
+          : WebsocketEvents.DRIVER_DETAILS_AND_LOCATION_RESPONSE,
+        data: {
+          message: isOffline
+            ? 'Driver has been offline for a while now'
+            : 'Driver is online',
+          ...details,
+        },
+      })),
     );
+  }
+
+  private cleanup(key: string) {
+    const subj = this.pollingSubjects.get(key);
+    if (subj) {
+      subj.complete();
+      this.pollingSubjects.delete(key);
+    }
+  }
+
+  private generateSubscriptionKey(socketId: string, driverId: number) {
+    return `${socketId}-${driverId}`;
   }
 }

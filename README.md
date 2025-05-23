@@ -111,7 +111,7 @@ All event names are defined in [`packages/shared/src/enums/websocket-messages.en
 
   Emitted when an error occurs; clients should subscribe to this to receive error notifications.
 
-- **SUBSCRIBE_TO_DRIVER_LOCATION_UPDATE_IN_REALTIME**
+- **SUBSCRIBE_TO_DRIVER_LOCATION_UPDATE**
 
   Subscribe to a WebSocket room that streams live location updates for a specific driver.
 
